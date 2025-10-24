@@ -5,7 +5,7 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # 3️⃣ Copy Maven-built jar into the container
-COPY target/shoppinglistmanager-0.0.1-SNAPSHOT.jar app.jar
+COPY app/shoppinglistmanager-0.0.1-SNAPSHOT.jar app.jar
 
 # 4️⃣ Expose port 8080
 EXPOSE 8080
