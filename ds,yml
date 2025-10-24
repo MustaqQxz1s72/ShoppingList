@@ -1,0 +1,86 @@
+---
+# MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "Test@123"
+        - name: MYSQL_DATABASE
+          value: "shoppinglistdb"
+        ports:
+        - containerPort: 3306
+          name: mysql
+---
+# MySQL Service (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql
+---
+# ShoppingList Application Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shoppinglist
+  labels:
+    app: shoppinglist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shoppinglist
+  template:
+    metadata:
+      labels:
+        app: shoppinglist
+    spec:
+      containers:
+      - name: shoppinglist
+        image: mustaqshaik123/shoppinglist:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://mysql-service:3306/shoppinglistdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+        - name: SPRING_DATASOURCE_USERNAME
+          value: root
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: Test@123
+---
+# ShoppingList Service (LoadBalancer for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: shoppinglist-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: shoppinglist
