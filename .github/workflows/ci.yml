@@ -150,4 +150,32 @@ jobs:
         kubectl apply -f ds.yml
         kubectl rollout restart deployment shoppinglist
     
+  monitoring_setup:
+     runs-on: self-hosted
+     needs: deploy_to_kubernetes   
+     steps:
+     - name: Checkout Code
+       uses: actions/checkout@v4
+
+     - name: Install Helm
+       run: |
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+        helm version
+
+     - name: Add Helm repos
+       run: |
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo add grafana https://grafana.github.io/helm-charts
+        helm repo update
+
+     - name: Install Prometheus + Grafana
+       run: |
+        kubectl create namespace monitoring || true
+        helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+          --namespace monitoring
+
+     - name: Deploy ServiceMonitor
+       run: |
+        kubectl apply -f shoppinglist-servicemonitor.yml
+
   
