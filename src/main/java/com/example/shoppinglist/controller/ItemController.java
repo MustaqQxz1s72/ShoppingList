@@ -3,7 +3,7 @@ package com.example.shoppinglist.controller;
 import com.example.shoppinglist.model.Item;
 import com.example.shoppinglist.repository.ItemRepository;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity; // ✅ add this line
+import org.springframework.http.ResponseEntity; 
 import java.util.ArrayList;
 import java.util.List;
 

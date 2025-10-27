@@ -1,0 +1,81 @@
+
+# Persistent Volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: h2-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/h2
+---
+# Persistent Volume Claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: h2-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shoppinglist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shoppinglist
+  template:
+    metadata:
+      labels:
+        app: shoppinglist
+    spec:
+      containers:
+        - name: shoppinglist
+          image: shoppinglist-app:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          volumeMounts:
+            - name: h2-storage
+              mountPath: /data
+      volumes:
+        - name: h2-storage
+          persistentVolumeClaim:
+            claimName: h2-pvc
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: shoppinglist-service
+spec:
+  type: NodePort
+  selector:
+    app: shoppinglist
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
