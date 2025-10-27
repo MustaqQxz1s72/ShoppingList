@@ -1,10 +1,9 @@
-package com.example.ShoppingListManager;
+package com.example.shoppinglist;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import com.example.shoppinglist.ShoppingListManagerApplication;
 
-@SpringBootTest(classes = ShoppingListManagerApplication.class)
+@SpringBootTest
 class ShoppingListManagerApplicationTests {
 
     @Test
